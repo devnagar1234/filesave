@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload and Text Edit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #dropArea {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            border: 2px dashed #ccc;
+            text-align: center;
+            padding-top: 60px;
+            margin: 20px auto;
+            color: #aaa;
+        }
+        #dropArea.dragover {
+            border-color: #333;
+            color: #333;
+        }
+        .imageContainer {
+            display: none;
+            margin-top: 20px;
+        }
+        .imageContainer img {
+            max-width: 100%;
+            height: auto;
+        }
+        .editTextArea {
+            display: none;
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dropArea">Drag & Drop your image file here</div>
+    
+    <div class="imageContainer">
+        <img id="uploadedImage" src="" alt="Uploaded Image">
+        <button id="editTextBtn">Edit Text Below</button>
+    </div>
+    
+    <center><div class="editTextArea">
+        <h2>Edit Image Text</h2>
+        <textarea id="imageText" rows="5" placeholder="Enter text related to the image"></textarea>
+        <button id="saveTextBtn">Save Text</button>
+    </div></center>
+
+    <script>
+        // Select the DOM elements
+        const dropArea = document.getElementById('dropArea');
+        const imageContainer = document.querySelector('.imageContainer');
+        const editTextBtn = document.getElementById('editTextBtn');
+        const editTextArea = document.querySelector('.editTextArea');
+        const uploadedImage = document.getElementById('uploadedImage');
+        const imageText = document.getElementById('imageText');
+        const saveTextBtn = document.getElementById('saveTextBtn');
+
+        // Load persisted image and text from localStorage on page load
+        window.onload = () => {
+            const savedImage = localStorage.getItem('uploadedImage');
+            const savedText = localStorage.getItem('imageText');
+
+            if (savedImage) {
+                uploadedImage.src = savedImage;
+                imageContainer.style.display = 'block';
+            }
+
+            if (savedText) {
+                imageText.value = savedText;
+                editTextArea.style.display = 'block';
+            }
+        };
+
+        // Add drag & drop events
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragover');
+            dropArea.textContent = 'Drop the file here';
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.classList.remove('dragover');
+            dropArea.textContent = 'Drag & Drop your image file here';
+        });
+
+        dropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropArea.classList.remove('dragover');
+            dropArea.textContent = 'File uploaded!';
+            handleFileDrop(e);
+        });
+
+        function handleFileDrop(event) {
+            const file = event.dataTransfer.files[0];
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const imageData = e.target.result;
+                    uploadedImage.src = imageData;
+                    imageContainer.style.display = 'block';
+
+                    // Save the image to localStorage
+                    localStorage.setItem('uploadedImage', imageData);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload an image file.');
+            }
+        }
+
+        // Show edit text area when the edit button is clicked
+        editTextBtn.addEventListener('click', () => {
+            editTextArea.style.display = 'block';
+        });
+
+        // Save the text in localStorage and persist it
+        saveTextBtn.addEventListener('click', () => {
+            const textData = imageText.value;
+            localStorage.setItem('imageText', textData);
+            alert('Text saved successfully!');
+        });
+
+        // Persist data in localStorage
+        window.onbeforeunload = () => {
+            localStorage.setItem('imageText', imageText.value);
+        };
+    </script>
+
+</body>
+</html>
